@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="styles.css" rel="stylesheet">
+
+    <script src="http://d3js.org/d3.v7.min.js"></script>
+    <title>ИИС Лаба 1</title>
+</head>
+<body>
+    <h3>Данные по продажам в Walmart</h3>
+    
+    <div class="flexbox-container">
+        <div>
+            <h4>Фильтр</h4>
+            <table class="table-controls">
+                <tr>
+                    <td>Магазин:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>Дата:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>Продажи за неделю:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>Выходной:</td>
+                    <td>
+                        <select>
+                            <option value="true" selected>Да</option>
+                            <option value="false">Нет</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Температура:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>Цена топлива:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>Цена за показ:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>Безработица:</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td><input type="button" value="Найти" id="applyFilters" disabled></td>
+                    <td><input type="button" value="Сбросить фильтры" class="button-right" id="resetFilters" disabled></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <h4>Сортировка</h4>
+            <table class="table-controls">
+                <tr>
+                    <td>Сортировать по</td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            <option value="false" selected>Нет</option>
+                            <option value="store">Магазин</option>
+                            <option value="weekly_sales">Продажи за неделю</option>
+                            <option value="holiday_flag">Выходной</option>
+                            <option value="temperature">Температура</option>
+                            <option value="fuel_price">Цена топлива</option>
+                            <option value="cpi">Цена за показ</option>
+                            <option value="unemployment">Безработица</option>
+                        </select>    
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            
+                        </select>
+                    </td>
+                    <td>По убыванию <input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td><input type="button" value="Сортировать" id="applySort" disabled></td>
+                    <td><input type="button" value="Сбросить сортировку" class="button-right" id="resetSort" disabled></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <h4>Группировка</h4>
+            <table class="table-controls">
+                <tr>
+                    <td>Группировать по</td>
+                    <td>
+                        <select>
+                            <option value="false" selected>Нет</option>
+                            <option value="store">Магазин</option>
+                            <option value="weekly_sales">Продажи за неделю</option>
+                            <option value="holiday_flag">Выходной</option>
+                            <option value="temperature">Температура</option>
+                            <option value="fuel_price">Цена топлива</option>
+                            <option value="cpi">Цена за показ</option>
+                            <option value="unemployment">Безработица</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            Использовать групповую функцию(и):
+            <table class="table-controls">
+                <tr>
+                    <td><input type="checkbox" value="количество"></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" value="максимум"></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" value="минимум"></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" value="среднее"></td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+    
+    <p>
+        <input type="button" id="showTable" value="Показать таблицу">
+    </p>
+    <table class="table-data" id="mainTable">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+
+    <script src="dataset.js"></script>
+    <script src="program.js"></script>
+</body>
+</html>
