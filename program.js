@@ -1,5 +1,15 @@
 let tableShown = false;
 
+const sortOptions = [["false", "Нет"], 
+                     ["store", "Магазин"], 
+                     ["date", "Дата"], 
+                     ["weekly_sales", "Продажи за неделю"], 
+                     ["holiday_flag", "Выходной"], 
+                     ["temperature", "Температура"], 
+                     ["fuel_price", "Цена топлива"], 
+                     ["cpi", "Цена за показ"], 
+                     ["unemployment", "Безработица"]];
+
 function showTable()
 {
     let table = d3.select("#mainTable");
@@ -186,11 +196,69 @@ d3.select("#resetFilters").on
     }
 );
 
+d3.select("#sortFilter1").on
+(
+    "change", function()
+    {
+        sortFilter1 = d3.select("#sortFilter1");
+        sortFilterInv1 = d3.select("#sortFilterInv1");
+        sortFilter2 = d3.select("#sortFilter2");
+        sortFilterInv2 = d3.select("#sortFilterInv2");
+        sortFilter3 = d3.select("#sortFilter3");
+        sortFilterInv3 = d3.select("#sortFilterInv3");
+
+        sortFilterInv1.property("checked", false);
+
+        sortFilter2.selectAll("option").remove();
+        sortFilterInv2.property("checked", false);
+        sortFilterInv2.attr("disabled", "disabled");
+
+        sortFilter3.selectAll("option").remove();
+        sortFilter3.attr("disabled", "disabled");
+        sortFilter3.append("option").property("value", "false").html("Нет").attr("selected", "selected");
+        sortFilterInv3.property("checked", false);
+        sortFilterInv3.attr("disabled", "disabled");
+
+        if(sortFilter1.property("value") === "false")
+        {
+            sortFilterInv1.attr("disabled", "disabled");
+
+            sortFilter2.attr("disabled", "disabled");
+            sortFilter2.append("option").property("value", "false").html("Нет").attr("selected", "selected");
+        }
+        else
+        {
+            sortFilterInv1.attr("disabled", null);
+
+            sortFilter2.attr("disabled", null);
+
+            for(const item of sortOptions)
+            {
+                if(item[0] !== sortFilter1.property("value"))
+                {
+                    sortFilter2.append("option").property("value", item[0]).html(item[1]);
+                }
+            }
+            sortFilter2.select("option").attr("selected", "selected");
+        }
+    }
+)
+
 d3.select("#applySort").on
 (
     "click", function()
     {
         let rows = d3.select("#mainTable").select("tbody").selectAll("tr");
         
+
+    }
+);
+
+d3.select("#resetSort").on
+(
+    "click", function()
+    {
+        deleteTable();
+        showTable();
     }
 );
