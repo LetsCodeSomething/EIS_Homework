@@ -244,6 +244,67 @@ d3.select("#sortFilter1").on
     }
 )
 
+d3.select("#sortFilter2").on
+(
+    "change", function()
+    {
+        sortFilter1 = d3.select("#sortFilter1");
+        sortFilter2 = d3.select("#sortFilter2");
+        sortFilterInv2 = d3.select("#sortFilterInv2");
+        sortFilter3 = d3.select("#sortFilter3");
+        sortFilterInv3 = d3.select("#sortFilterInv3");
+
+        sortFilterInv2.property("checked", false);
+
+        sortFilter3.selectAll("option").remove();
+        sortFilterInv3.property("checked", false);
+        sortFilterInv3.attr("disabled", "disabled");
+
+        if(sortFilter2.property("value") === "false")
+        {
+            sortFilterInv2.attr("disabled", "disabled");
+
+            sortFilter3.attr("disabled", "disabled");
+            sortFilter3.append("option").property("value", "false").html("Нет").attr("selected", "selected");
+        }
+        else
+        {
+            sortFilterInv2.attr("disabled", null);
+
+            sortFilter3.attr("disabled", null);
+
+            for(const item of sortOptions)
+            {
+                if(item[0] !== sortFilter1.property("value") && item[0] !== sortFilter2.property("value"))
+                {
+                    sortFilter3.append("option").property("value", item[0]).html(item[1]);
+                }
+            }
+            sortFilter3.select("option").attr("selected", "selected");
+        }
+    }
+)
+
+d3.select("#sortFilter3").on
+(
+    "change", function()
+    {
+        sortFilter3 = d3.select("#sortFilter3");
+        sortFilterInv3 = d3.select("#sortFilterInv3");
+
+        sortFilterInv3.property("checked", false);
+
+        if(sortFilter2.property("value") === "false")
+        {
+            sortFilterInv3.attr("disabled", "disabled");
+        }
+        else
+        {
+            sortFilterInv3.attr("disabled", null);
+        }
+    }
+)
+
 d3.select("#applySort").on
 (
     "click", function()
