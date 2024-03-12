@@ -18,43 +18,52 @@
             <table class="table-controls">
                 <tr>
                     <td>Магазин:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="text" id="storeFilter1"></td>
+                    <td>до <input type="text" id="storeFilter2"></td>
                 </tr>
                 <tr>
                     <td>Дата:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="date" id="dateFilter1"></td>
+                    <td>до <input type="date" id="dateFilter2"></td>
                 </tr>
                 <tr>
                     <td>Продажи за неделю:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="text" id="weeklySalesFilter1"></td>
+                    <td>до <input type="text" id="weeklySalesFilter2"></td>
                 </tr>
                 <tr>
                     <td>Выходной:</td>
                     <td>
-                        <select>
-                            <option value="true" selected>Да</option>
-                            <option value="false">Нет</option>
+                        <select id="holidayFlagFilter">
+                            <option value="false" selected>Не важно</option>
+                            <option value="yes">Да</option>
+                            <option value="no">Нет</option>
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td>Температура:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="text" id="temperatureFilter1"></td>
+                    <td>до <input type="text" id="temperatureFilter2"></td>
                 </tr>
                 <tr>
                     <td>Цена топлива:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="text" id="fuelPriceFilter1"></td>
+                    <td>до <input type="text" id="fuelPriceFilter2"></td>
                 </tr>
                 <tr>
                     <td>Цена за показ:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="text" id="cpiFilter1"></td>
+                    <td>до <input type="text" id="cpiFilter2"></td>
                 </tr>
                 <tr>
                     <td>Безработица:</td>
-                    <td><input type="text"></td>
+                    <td>от <input type="text" id="unemploymentFilter1"></td>
+                    <td>до <input type="text" id="unemploymentFilter2"></td>
                 </tr>
                 <tr>
                     <td><input type="button" value="Найти" id="applyFilters" disabled></td>
+                    <td></td>
                     <td><input type="button" value="Сбросить фильтры" class="button-right" id="resetFilters" disabled></td>
                 </tr>
             </table>
@@ -70,6 +79,7 @@
                         <select>
                             <option value="false" selected>Нет</option>
                             <option value="store">Магазин</option>
+                            <option value="date">Дата</option>
                             <option value="weekly_sales">Продажи за неделю</option>
                             <option value="holiday_flag">Выходной</option>
                             <option value="temperature">Температура</option>
@@ -97,46 +107,6 @@
                     <td>По убыванию <input type="checkbox"></td>
                 </tr>
                 <tr>
-                    <td>
-                        <select>
-                            
-                        </select>
-                    </td>
-                    <td>По убыванию <input type="checkbox"></td>
-                </tr>
-                <tr>
-                    <td>
-                        <select>
-                            
-                        </select>
-                    </td>
-                    <td>По убыванию <input type="checkbox"></td>
-                </tr>
-                <tr>
-                    <td>
-                        <select>
-                            
-                        </select>
-                    </td>
-                    <td>По убыванию <input type="checkbox"></td>
-                </tr>
-                <tr>
-                    <td>
-                        <select>
-                            
-                        </select>
-                    </td>
-                    <td>По убыванию <input type="checkbox"></td>
-                </tr>
-                <tr>
-                    <td>
-                        <select>
-                            
-                        </select>
-                    </td>
-                    <td>По убыванию <input type="checkbox"></td>
-                </tr>
-                <tr>
                     <td><input type="button" value="Сортировать" id="applySort" disabled></td>
                     <td><input type="button" value="Сбросить сортировку" class="button-right" id="resetSort" disabled></td>
                 </tr>
@@ -146,11 +116,11 @@
             <h4>Группировка</h4>
             <table class="table-controls">
                 <tr>
-                    <td>Группировать по</td>
-                    <td>
+                    <td>Группировать по
                         <select>
                             <option value="false" selected>Нет</option>
                             <option value="store">Магазин</option>
+                            <option value="date">Дата</option>
                             <option value="weekly_sales">Продажи за неделю</option>
                             <option value="holiday_flag">Выходной</option>
                             <option value="temperature">Температура</option>
@@ -160,20 +130,20 @@
                         </select>
                     </td>
                 </tr>
-            </table>
-            Использовать групповую функцию(и):
-            <table class="table-controls">
                 <tr>
-                    <td><input type="checkbox" value="количество"></td>
+                    <td>Использовать групповую функцию(и):</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="максимум"></td>
+                    <td><input type="checkbox" value="количество">количество</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="минимум"></td>
+                    <td><input type="checkbox" value="максимум">максимум</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="среднее"></td>
+                    <td><input type="checkbox" value="минимум">минимум</td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" value="среднее">среднее</td>
                 </tr>
             </table>
 

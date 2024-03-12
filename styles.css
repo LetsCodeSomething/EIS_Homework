@@ -39,6 +39,10 @@
     padding-left: 10px;
 }
 
+.table-controls input[type="text"], input[type="date"] {
+    max-width: 130px;
+}
+
 .button-right {
     float: right;
 }
@@ -46,7 +50,8 @@
 .flexbox-container {
     display: flex;
     flex-direction: row;
-    column-gap: 100px;
+    /*column-gap: 100px;*/
+    justify-content: space-around;
 }
 
 
