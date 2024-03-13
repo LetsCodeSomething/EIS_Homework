@@ -42,6 +42,130 @@ function stringToDate(str, delimiter)
     return dateObject;
 }
 
+let compareByStore = (a, b) => {
+    if(a.Store < b.Store)
+    {
+        return -1;
+    }
+    else if(a.Store > b.Store)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByDate = (a, b) => {
+    let aDate = stringToDate(a.Date, "-");
+    let bDate = stringToDate(b.Date, "-");
+
+    if(aDate < bDate)
+    {
+        return -1;
+    }
+    else if(aDate > bDate)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByWeeklySales = (a, b) => {
+    if(a.Weekly_Sales < b.Weekly_Sales)
+    {
+        return -1;
+    }
+    else if(a.Weekly_Sales > b.Weekly_Sales)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByHolidayFlag = (a, b) => {
+    if(a.Holiday_Flag < b.Holiday_Flag)
+    {
+        return -1;
+    }
+    else if(a.Holiday_Flag > b.Holiday_Flag)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByTemperature = (a, b) => {
+    if(a.Temperature < b.Temperature)
+    {
+        return -1;
+    }
+    else if(a.Temperature > b.Temperature)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByFuelPrice = (a, b) => {
+    if(a.Fuel_Price < b.Fuel_Price)
+    {
+        return -1;
+    }
+    else if(a.Fuel_Price > b.Fuel_Price)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByCpi = (a, b) => {
+    if(a.CPI < b.CPI)
+    {
+        return -1;
+    }
+    else if(a.CPI > b.CPI)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+let compareByUnemployment = (a, b) => {
+    if(a.Unemployment < b.Unemployment)
+    {
+        return -1;
+    }
+    else if(a.Unemployment > b.Unemployment)
+    {
+        return 1;
+    }
+
+    return 0;
+};
+
+function getComparator(str)
+{
+    switch(str)
+    {
+        case "false": return null;
+        case "store": return compareByStore;
+        case "date": return compareByDate;
+        case "weekly_sales": return compareByWeeklySales;
+        case "holiday_flag": return compareByHolidayFlag;
+        case "temperature": return compareByTemperature;
+        case "fuel_price": return compareByFuelPrice;
+        case "cpi": return compareByCpi;
+        case "unemployment": return compareByUnemployment;
+        default: return null;
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 d3.select("#showTable").on
@@ -75,6 +199,8 @@ d3.select("#showTable").on
         }
     }
 );
+
+////////////////////////////////////////////////////////////////////////
 
 d3.select("#applyFilters").on
 (
@@ -196,16 +322,18 @@ d3.select("#resetFilters").on
     }
 );
 
+////////////////////////////////////////////////////////////////////////
+
 d3.select("#sortFilter1").on
 (
     "change", function()
     {
-        sortFilter1 = d3.select("#sortFilter1");
-        sortFilterInv1 = d3.select("#sortFilterInv1");
-        sortFilter2 = d3.select("#sortFilter2");
-        sortFilterInv2 = d3.select("#sortFilterInv2");
-        sortFilter3 = d3.select("#sortFilter3");
-        sortFilterInv3 = d3.select("#sortFilterInv3");
+        let sortFilter1 = d3.select("#sortFilter1");
+        let sortFilterInv1 = d3.select("#sortFilterInv1");
+        let sortFilter2 = d3.select("#sortFilter2");
+        let sortFilterInv2 = d3.select("#sortFilterInv2");
+        let sortFilter3 = d3.select("#sortFilter3");
+        let sortFilterInv3 = d3.select("#sortFilterInv3");
 
         sortFilterInv1.property("checked", false);
 
@@ -248,11 +376,11 @@ d3.select("#sortFilter2").on
 (
     "change", function()
     {
-        sortFilter1 = d3.select("#sortFilter1");
-        sortFilter2 = d3.select("#sortFilter2");
-        sortFilterInv2 = d3.select("#sortFilterInv2");
-        sortFilter3 = d3.select("#sortFilter3");
-        sortFilterInv3 = d3.select("#sortFilterInv3");
+        let sortFilter1 = d3.select("#sortFilter1");
+        let sortFilter2 = d3.select("#sortFilter2");
+        let sortFilterInv2 = d3.select("#sortFilterInv2");
+        let sortFilter3 = d3.select("#sortFilter3");
+        let sortFilterInv3 = d3.select("#sortFilterInv3");
 
         sortFilterInv2.property("checked", false);
 
@@ -289,12 +417,12 @@ d3.select("#sortFilter3").on
 (
     "change", function()
     {
-        sortFilter3 = d3.select("#sortFilter3");
-        sortFilterInv3 = d3.select("#sortFilterInv3");
-
+        let sortFilter3 = d3.select("#sortFilter3");
+        let sortFilterInv3 = d3.select("#sortFilterInv3");
+        
         sortFilterInv3.property("checked", false);
 
-        if(sortFilter2.property("value") === "false")
+        if(sortFilter3.property("value") === "false")
         {
             sortFilterInv3.attr("disabled", "disabled");
         }
@@ -311,7 +439,73 @@ d3.select("#applySort").on
     {
         let rows = d3.select("#mainTable").select("tbody").selectAll("tr");
         
+        let sortFilter1 = d3.select("#sortFilter1");
+        let sortFilterInv1 = d3.select("#sortFilterInv1");
+        let sortFilter2 = d3.select("#sortFilter2");
+        let sortFilterInv2 = d3.select("#sortFilterInv2");
+        let sortFilter3 = d3.select("#sortFilter3");
+        let sortFilterInv3 = d3.select("#sortFilterInv3");
 
+        let level1Order = sortFilterInv1.property("checked") ? -1 : 1;
+        let level2Order = sortFilterInv2.property("checked") ? -1 : 1;
+        let level3Order = sortFilterInv3.property("checked") ? -1 : 1;
+        
+        let comparator1 = getComparator(sortFilter1.property("value"));
+        let comparator2 = getComparator(sortFilter2.property("value"));
+        let comparator3 = getComparator(sortFilter3.property("value"));
+        
+        if(!comparator1)
+        {
+            return;
+        }
+        else if(!comparator2)
+        {
+            let oneLayerSort = (a, b) => {
+                let value = comparator1(a, b);
+                value = (value === 0) ? 1 : value;
+                return value === -1 ? -level1Order : level1Order;
+            };
+   
+            rows.sort(oneLayerSort);
+        }
+        else if(!comparator3)
+        {
+            let twoLayersSort = (a, b) => {
+                let value = comparator1(a, b);
+                if(value !== 0)
+                {
+                    return value === -1 ? -level1Order : level1Order;
+                }
+
+                let value2 = comparator2(a, b);
+                value2 = (value2 === 0) ? 1 : value2;
+                return value2 === -1 ? -level2Order : level2Order;
+            }
+
+            rows.sort(twoLayersSort);
+        }
+        else
+        {
+            let threeLayersSort = (a, b) => {
+                let value = comparator1(a, b);
+                if(value !== 0)
+                {
+                    return value === -1 ? -level1Order : level1Order;
+                }
+
+                let value2 = comparator2(a, b);
+                if(value2 !== 0)
+                {
+                    return value2 === -1 ? -level2Order : level2Order;
+                }
+                
+                let value3 = comparator3(a, b);
+                value3 = (value3 === 0) ? 1 : value3;
+                return value3 === -1 ? -level3Order : level3Order;
+            }
+
+            rows.sort(threeLayersSort);
+        }
     }
 );
 
