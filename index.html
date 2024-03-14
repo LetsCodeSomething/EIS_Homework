@@ -117,7 +117,7 @@
             <table class="table-controls">
                 <tr>
                     <td>Группировать по
-                        <select>
+                        <select id="groupFilter">
                             <option value="false" selected>Нет</option>
                             <option value="store">Магазин</option>
                             <option value="date">Дата</option>
@@ -134,16 +134,28 @@
                     <td>Использовать групповую функцию(и):</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="количество">количество</td>
+                    <td><input type="checkbox" value="количество" id="groupCountFunc" disabled>количество</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="максимум">максимум</td>
+                    <td><input type="checkbox" value="максимум" id="groupMaxFunc" disabled>максимум</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="минимум">минимум</td>
+                    <td><input type="checkbox" value="минимум" id="groupMinFunc" disabled>минимум</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" value="среднее">среднее</td>
+                    <td><input type="checkbox" value="среднее" id="groupMeanFunc" disabled>среднее</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" value="Группировать" id="applyGrouping" disabled>
+                        <input type="button" value="Сбросить группировку" id="resetGrouping" disabled>
+                    </td>
+                </tr>
+                <tr>
+                    <table class="table-data" id="groupTable">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
                 </tr>
             </table>
 

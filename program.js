@@ -10,7 +10,7 @@ const sortOptions = [["false", "Нет"],
                      ["cpi", "Цена за показ"], 
                      ["unemployment", "Безработица"]];
 
-function showTable()
+function showMainTable()
 {
     let table = d3.select("#mainTable");
 
@@ -19,7 +19,7 @@ function showTable()
     let head  = table.select("thead").insert("tr", "tr").selectAll("tr").data(d => Object.keys(dataset[0])).enter().append("td").text(d => d);
 }
 
-function deleteTable()
+function deleteMainTable()
 {
     d3.select("#mainTable").select("tbody").selectAll("tr").remove();
     d3.select("#mainTable").select("thead").selectAll("tr").remove();
@@ -166,6 +166,12 @@ function getComparator(str)
     }
 }
 
+function deleteGroupTable()
+{
+    d3.select("#groupTable").select("tbody").selectAll("tr").remove();
+    d3.select("#groupTable").select("thead").selectAll("tr").remove();
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 d3.select("#showTable").on
@@ -178,24 +184,28 @@ d3.select("#showTable").on
             tableShown = true;
             buttonValue.attr("value", "Скрыть таблицу");
             
-            showTable();
+            showMainTable();
 
             d3.select("#applyFilters").attr("disabled", null);
             d3.select("#resetFilters").attr("disabled", null);
             d3.select("#applySort").attr("disabled", null);
             d3.select("#resetSort").attr("disabled", null);
+            d3.select("#applyGrouping").attr("disabled", null);
+            d3.select("#resetGrouping").attr("disabled", null);
         }
         else
         {
             tableShown = false;
             buttonValue.attr("value", "Показать таблицу");
 
-            deleteTable();
+            deleteMainTable();
 
             d3.select("#applyFilters").attr("disabled", "disabled");
             d3.select("#resetFilters").attr("disabled", "disabled");
             d3.select("#applySort").attr("disabled", "disabled");
             d3.select("#resetSort").attr("disabled", "disabled");
+            d3.select("#applyGrouping").attr("disabled", "disabled");
+            d3.select("#resetGrouping").attr("disabled", "disabled");
         }
     }
 );
@@ -317,8 +327,8 @@ d3.select("#resetFilters").on
 (
     "click", function()
     {
-        deleteTable();
-        showTable();
+        deleteMainTable();
+        showMainTable();
     }
 );
 
@@ -513,7 +523,101 @@ d3.select("#resetSort").on
 (
     "click", function()
     {
-        deleteTable();
-        showTable();
+        deleteMainTable();
+        showMainTable();
+    }
+);
+
+////////////////////////////////////////////////////////////////////////
+
+d3.select("#groupFilter").on
+(
+    "change", function()
+    {
+        groupCountFunc = d3.select("#groupCountFunc");
+        groupMaxFunc   = d3.select("#groupMaxFunc");
+        groupMinFunc   = d3.select("#groupMinFunc");
+        groupMeanFunc  = d3.select("#groupMeanFunc");
+
+        if(d3.select("#groupFilter").property("value") === "false")
+        {
+            groupCountFunc.property("checked", false);
+            groupMaxFunc.property("checked", false);
+            groupMinFunc.property("checked", false);
+            groupMeanFunc.property("checked", false);
+
+            groupCountFunc.attr("disabled", "disabled");
+            groupMaxFunc.attr("disabled", "disabled");
+            groupMinFunc.attr("disabled", "disabled");
+            groupMeanFunc.attr("disabled", "disabled");
+        }
+        else
+        {
+            groupCountFunc.attr("disabled", null);
+            groupMaxFunc.attr("disabled", null);
+            groupMinFunc.attr("disabled", null);
+            groupMeanFunc.attr("disabled", null);
+        }
+    }
+);
+
+d3.select("#applyGrouping").on
+(
+    "click", function()
+    {
+        deleteGroupTable();
+
+        let groupFilter = d3.select("#groupFilter");
+        let groupFilterValue = groupFilter.property("value");
+        let groupTable = d3.select("#groupTable");
+
+        let group;
+
+        switch(groupFilterValue)
+        {
+            case "false":
+                return;
+            case "store":
+                group = d3.group(dataset, d => d.Store);
+                break;
+            case "date":
+                group = d3.group(dataset, d => d.Date);
+                break;
+            case "weekly_sales":
+                group = d3.group(dataset, d => d.Weekly_Sales);
+                break;
+            case "holiday_flag":
+                group = d3.group(dataset, d => d.Holiday_Flag);
+                break;
+            case "temperature":
+                group = d3.group(dataset, d => d.Temperature);
+                break;
+            case "fuel_price":
+                group = d3.group(dataset, d => d.Fuel_Price);
+                break;
+            case "cpi":
+                group = d3.group(dataset, d => d.CPI);
+                break;
+            case "unemployment":
+                group = d3.group(dataset, d => d.Unemployment);
+                break;
+        }
+
+        console.log(group);
+
+        //for(let item of group)
+        //{
+        //    let row = groupTable.
+            //TODO:
+            //groupTable.select("tbody").append("tr");
+        //}
+    }
+);
+
+d3.select("#resetGrouping").on
+(
+    "click", function()
+    {
+        deleteGroupTable();
     }
 );
