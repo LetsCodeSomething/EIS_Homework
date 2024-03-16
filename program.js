@@ -570,47 +570,97 @@ d3.select("#applyGrouping").on
         let groupFilter = d3.select("#groupFilter");
         let groupFilterValue = groupFilter.property("value");
         let groupTable = d3.select("#groupTable");
+        let head = groupTable.select("thead").insert("tr");
+
+        let groupCountFunc = d3.select("#groupCountFunc").property("checked");
+        let groupMaxFunc = d3.select("#groupMaxFunc").property("checked");
+        let groupMinFunc = d3.select("#groupMinFunc").property("checked");
+        let groupMeanFunc = d3.select("#groupMeanFunc").property("checked");
 
         let group;
-
         switch(groupFilterValue)
         {
             case "false":
                 return;
             case "store":
                 group = d3.group(dataset, d => d.Store);
+                head.append("td").text("Store");
                 break;
             case "date":
                 group = d3.group(dataset, d => d.Date);
+                head.append("td").text("Date");
                 break;
             case "weekly_sales":
-                group = d3.group(dataset, d => d.Weekly_Sales);
-                break;
+                //group = d3.group(dataset, d => d.Weekly_Sales);
+                //head.append("td").text("Weekly_Sales");
+                return;
+                //break;
             case "holiday_flag":
                 group = d3.group(dataset, d => d.Holiday_Flag);
+                head.append("td").text("Holiday_Flag");
                 break;
             case "temperature":
                 group = d3.group(dataset, d => d.Temperature);
+                head.append("td").text("Temperature");
                 break;
             case "fuel_price":
                 group = d3.group(dataset, d => d.Fuel_Price);
+                head.append("td").text("Fuel_Price");
                 break;
             case "cpi":
                 group = d3.group(dataset, d => d.CPI);
+                head.append("td").text("CPI");
                 break;
             case "unemployment":
                 group = d3.group(dataset, d => d.Unemployment);
+                head.append("td").text("Unemployment");
                 break;
         }
 
-        console.log(group);
+        if(groupCountFunc)
+        {
+            head.append("td").text("Кол.");
+        }
+        if(groupMaxFunc)
+        {
+            head.append("td").text("Макс.");
+        }
+        if(groupMinFunc)
+        {
+            head.append("td").text("Мин.");
+        }
+        if(groupMeanFunc)
+        {
+            head.append("td").text("Сред.");
+        }        
+        
+        for(const item of group)
+        {
+            let row = groupTable.select("tbody").append("tr");
 
-        //for(let item of group)
-        //{
-        //    let row = groupTable.
-            //TODO:
-            //groupTable.select("tbody").append("tr");
-        //}
+            row.append("td").text(item[0]);
+            
+            if(groupCountFunc)
+            {
+                let count = d3.count(item[1].map(d => d.Weekly_sales));
+                row.append("td").text(count);
+            }
+            if(groupMaxFunc)
+            {
+                let max = d3.max(item[1].map(d => d.Weekly_Sales));
+                row.append("td").text(max);
+            }
+            if(groupMinFunc)
+            {
+                let min = d3.min(item[1].map(d => d.Weekly_Sales));
+                row.append("td").text(min);
+            }
+            if(groupMeanFunc)
+            {
+                let mean = d3.mean(item[1].map(d => d.Weekly_Sales));
+                row.append("td").text(mean);
+            } 
+        }
     }
 );
 
