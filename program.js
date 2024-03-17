@@ -737,11 +737,11 @@ function drawGraph()
     // рисуем графики
     if (isMin) 
     {
-        createChart(arrGraph, scX, scY, 0, "blue");
+        createChart(arrGraph, scX, scY, 0, "blue", graphDot);
     }
     if (isMax) 
     {
-        createChart(arrGraph, scX, scY, 1, "red");
+        createChart(arrGraph, scX, scY, 1, "red", graphDot);
     }
 }
 
@@ -817,19 +817,37 @@ function createAxis(data, isMin, isMax)
     return [scaleX, scaleY];
 }
 
-function createChart(data, scaleX, scaleY, index, color) 
+function createChart(data, scaleX, scaleY, index, color, graphType) 
 {
-    const r = 4;
-    // чтобы точки не накладывались, сдвинем их по вертикали
-    let ident = (index == 0)? -r / 2 : r / 2;
-   
+    //Dot graph.
+    if(graphType)
+    {
+        const r = 4;
+        // чтобы точки не накладывались, сдвинем их по вертикали
+        let ident = (index == 0)? -r / 2 : r / 2;
+
+        svg.selectAll(".dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("r", r)
+            .attr("cx", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
+            .attr("cy", d => scaleY(d.values[index]) + ident)
+            .attr("transform", `translate(${marginX}, ${marginY})`)
+            .style("fill", color);
+        return;
+    }
+
+    //Histogram.
+    const barWidth = 5.0;
+    const offset = (index == 0) ? -barWidth / 2 : barWidth / 2;
     svg.selectAll(".dot")
         .data(data)
         .enter()
-        .append("circle")
-        .attr("r", r)
-        .attr("cx", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
-        .attr("cy", d => scaleY(d.values[index]) + ident)
-        .attr("transform", `translate(${marginX}, ${marginY})`)
+        .append("rect")
+        .attr("width", barWidth)
+        .attr("x", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
+        .attr("height", d => height - marginY * 2 - scaleY(d.values[index]))
+        .attr("transform", d => `translate(${marginX - barWidth / 2 + offset},${marginY + scaleY(d.values[index])})`)
         .style("fill", color);
 }   
