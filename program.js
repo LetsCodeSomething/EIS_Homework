@@ -681,38 +681,19 @@ const width = 800;
 
 let svg = d3.select("svg");
 
+d3.select(window).on
+(
+    "load", function()
+    {
+        drawGraph();
+    }
+);
+
 d3.select("#drawGraph").on
 (
     "click", function()
     {
-        svg.attr("height", height).attr("width", width);
-
-        let oxStore = d3.select("#oxStore");
-        const keyX = oxStore.property("checked") ? "Store" : "Unemployment";
-
-        // значения по оси ОУ
-        let oyMax = d3.select("#oyMax");
-        let oyMin = d3.select("#oyMin");
-        const isMax = oyMax.property("checked");
-        const isMin = oyMin.property("checked");
-       
-        // создаем массив для построения графика
-        const arrGraph = createArrGraph(dataset, keyX);
-       
-        svg.selectAll("*").remove();
-       
-        // создаем шкалы преобразования и выводим оси
-        const [scX, scY] = createAxis(arrGraph, isMin, isMax);
-       
-        // рисуем графики
-        if (isMin) 
-        {
-            createChart(arrGraph, scX, scY, 0, "blue");
-        }
-        if (isMax) 
-        {
-            createChart(arrGraph, scX, scY, 1, "red");
-        }
+        drawGraph();
     }
 );
 
@@ -724,6 +705,45 @@ d3.select("#deleteGraph").on
         svg.selectAll("*").remove();
     }
 );
+
+function drawGraph()
+{
+    let oxStore = d3.select("#oxStore");
+    const keyX = oxStore.property("checked") ? "Store" : "Unemployment";
+
+    // значения по оси ОУ
+    let oyMax = d3.select("#oyMax");
+    let oyMin = d3.select("#oyMin");
+    const isMax = oyMax.property("checked");
+    const isMin = oyMin.property("checked");
+   
+    if(!isMax && !isMin)
+    {
+        alert("Ошибка: не выбраны данные для построения графика");
+        return;
+    }
+
+    svg.attr("height", height).attr("width", width);
+    svg.selectAll("*").remove();
+
+    // создаем массив для построения графика
+    const arrGraph = createArrGraph(dataset, keyX);
+   
+    // создаем шкалы преобразования и выводим оси
+    const [scX, scY] = createAxis(arrGraph, isMin, isMax);
+    
+    let graphDot = d3.select("#graphDot").property("checked");
+
+    // рисуем графики
+    if (isMin) 
+    {
+        createChart(arrGraph, scX, scY, 0, "blue");
+    }
+    if (isMax) 
+    {
+        createChart(arrGraph, scX, scY, 1, "red");
+    }
+}
 
 function createArrGraph(data, key)
 {
@@ -738,14 +758,36 @@ function createArrGraph(data, key)
     return arrGraph;
 }
 
-function createAxis(data, isFirst, isSecond)
+function createAxis(data, isMin, isMax)
 {
     // в зависимости от выбранных пользователем данных по OY
     // находим интервал значений по оси OY
     let firstRange = d3.extent(data.map(d => d.values[0]));
     let secondRange = d3.extent(data.map(d => d.values[1]));
-    let min = firstRange[0];
-    let max = secondRange[1];
+    
+    let min; 
+    let max; 
+    
+    //isMin and isMax can't be false simultaneously.
+    if(isMin)
+    {
+        if(isMax)
+        {
+            min = firstRange[0];
+            max = secondRange[1];
+        }
+        else
+        {
+            min = firstRange[0];
+            max = firstRange[1];
+        }
+    }
+    else
+    {
+        min = secondRange[0];
+        max = secondRange[1];
+    }
+
     // функция интерполяции значений на оси
     let scaleX = d3.scaleBand()
     .domain(data.map(d => d.labelX))

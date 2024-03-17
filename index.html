@@ -19,12 +19,15 @@
         <p>Значение по оси OY</p>
         <input type="checkbox" name="oy" id="oyMax" checked>Максимальные продажи за неделю<br>
         <input type="checkbox" name="oy" id="oyMin">Минимальные продажи за неделю<br>
+        <p>Тип диаграммы</p>
+        <input type="radio" name="graphType" id="graphDot" checked>Точечная<br>
+        <input type="radio" name="graphType" id="graphLine">Столбчатая<br>
         <p>
             <input type="button" value="Построить" id="drawGraph">
             <input type="button" value="Стереть диаграмму" id="deleteGraph">
         </p>
         <p>
-            <svg></svg>
+            <svg height=0></svg>
         </p>
     </div>
 
