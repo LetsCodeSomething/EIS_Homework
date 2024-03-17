@@ -671,3 +671,123 @@ d3.select("#resetGrouping").on
         deleteGroupTable();
     }
 );
+
+////////////////////////////////////////////////////////////////////////
+
+const marginX = 50;
+const marginY = 50;
+const height = 400;
+const width = 800;
+
+let svg = d3.select("svg");
+
+d3.select("#drawGraph").on
+(
+    "click", function()
+    {
+        svg.attr("height", height).attr("width", width);
+
+        let oxStore = d3.select("#oxStore");
+        const keyX = oxStore.property("checked") ? "Store" : "Unemployment";
+
+        // значения по оси ОУ
+        let oyMax = d3.select("#oyMax");
+        let oyMin = d3.select("#oyMin");
+        const isMax = oyMax.property("checked");
+        const isMin = oyMin.property("checked");
+       
+        // создаем массив для построения графика
+        const arrGraph = createArrGraph(dataset, keyX);
+       
+        svg.selectAll("*").remove();
+       
+        // создаем шкалы преобразования и выводим оси
+        const [scX, scY] = createAxis(arrGraph, isMin, isMax);
+       
+        // рисуем графики
+        if (isMin) 
+        {
+            createChart(arrGraph, scX, scY, 0, "blue");
+        }
+        if (isMax) 
+        {
+            createChart(arrGraph, scX, scY, 1, "red");
+        }
+    }
+);
+
+d3.select("#deleteGraph").on
+(
+    "click", function() 
+    {
+        svg.attr("height", 0);
+        svg.selectAll("*").remove();
+    }
+);
+
+function createArrGraph(data, key)
+{
+    groupObj = d3.group(data, d => d[key]);
+    let arrGraph =[];
+    
+    for(const entry of groupObj)
+    {
+        let minMax = d3.extent(entry[1].map(d => d["Weekly_Sales"]));
+        arrGraph.push({labelX : entry[0], values : minMax});
+    }
+    return arrGraph;
+}
+
+function createAxis(data, isFirst, isSecond)
+{
+    // в зависимости от выбранных пользователем данных по OY
+    // находим интервал значений по оси OY
+    let firstRange = d3.extent(data.map(d => d.values[0]));
+    let secondRange = d3.extent(data.map(d => d.values[1]));
+    let min = firstRange[0];
+    let max = secondRange[1];
+    // функция интерполяции значений на оси
+    let scaleX = d3.scaleBand()
+    .domain(data.map(d => d.labelX))
+    .range([0, width - 2 * marginX]);
+   
+    let scaleY = d3.scaleLinear()
+    .domain([min * 0.85, max * 1.1 ])
+    .range([height - 2 * marginY, 0]);
+   
+    // создание осей
+    let axisX = d3.axisBottom(scaleX); // горизонтальная
+    let axisY = d3.axisLeft(scaleY); // вертикальная
+    // отрисовка осей в SVG-элементе
+    svg.append("g")
+        .attr("transform", `translate(${marginX}, ${height - marginY})`)
+        .call(axisX)
+        .selectAll("text") // подписи на оси - наклонные
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", d => "rotate(-45)");
+   
+    svg.append("g")
+        .attr("transform", `translate(${marginX}, ${marginY})`)
+        .call(axisY);
+   
+    return [scaleX, scaleY];
+}
+
+function createChart(data, scaleX, scaleY, index, color) 
+{
+    const r = 4;
+    // чтобы точки не накладывались, сдвинем их по вертикали
+    let ident = (index == 0)? -r / 2 : r / 2;
+   
+    svg.selectAll(".dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("r", r)
+        .attr("cx", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
+        .attr("cy", d => scaleY(d.values[index]) + ident)
+        .attr("transform", `translate(${marginX}, ${marginY})`)
+        .style("fill", color);
+}   

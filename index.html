@@ -12,6 +12,22 @@
 <body>
     <h3>Данные по продажам в Walmart</h3>
     
+    <div>
+        <p>Значение по оси OX</p>
+        <input type="radio" name="ox" value="store" id="oxStore" checked>Магазин<br>
+        <input type="radio" name="ox" value="unemployment" id="oxUnemployment">Безработица<br>
+        <p>Значение по оси OY</p>
+        <input type="checkbox" name="oy" id="oyMax" checked>Максимальные продажи за неделю<br>
+        <input type="checkbox" name="oy" id="oyMin">Минимальные продажи за неделю<br>
+        <p>
+            <input type="button" value="Построить" id="drawGraph">
+            <input type="button" value="Стереть диаграмму" id="deleteGraph">
+        </p>
+        <p>
+            <svg></svg>
+        </p>
+    </div>
+
     <div class="flexbox-container">
         <div>
             <h4>Фильтр</h4>
