@@ -732,16 +732,16 @@ function drawGraph()
     // создаем шкалы преобразования и выводим оси
     const [scX, scY] = createAxis(arrGraph, isMin, isMax);
     
-    let graphDot = d3.select("#graphDot").property("checked");
+    let graphType = d3.select("#graphDot").property("checked") ? 0 : (d3.select("#graphHisto").property("checked") ? 1 : 2);
 
     // рисуем графики
     if (isMin) 
     {
-        createChart(arrGraph, scX, scY, 0, "blue", graphDot);
+        createChart(arrGraph, scX, scY, 0, "blue", graphType);
     }
     if (isMax) 
     {
-        createChart(arrGraph, scX, scY, 1, "red", graphDot);
+        createChart(arrGraph, scX, scY, 1, "red", graphType);
     }
 }
 
@@ -820,7 +820,7 @@ function createAxis(data, isMin, isMax)
 function createChart(data, scaleX, scaleY, index, color, graphType) 
 {
     //Dot graph.
-    if(graphType)
+    if(graphType == 0)
     {
         const r = 4;
         // чтобы точки не накладывались, сдвинем их по вертикали
@@ -835,19 +835,95 @@ function createChart(data, scaleX, scaleY, index, color, graphType)
             .attr("cy", d => scaleY(d.values[index]) + ident)
             .attr("transform", `translate(${marginX}, ${marginY})`)
             .style("fill", color);
+    }
+    else if(graphType == 1)
+    {
+        //Histogram.
+        const barWidth = 5.0;
+        const offset = (index == 0) ? -barWidth / 2 : barWidth / 2;
+        svg.selectAll(".dot")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("width", barWidth)
+            .attr("x", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
+            .attr("height", d => height - marginY * 2 - scaleY(d.values[index]))
+            .attr("transform", d => `translate(${marginX - barWidth / 2 + offset},${marginY + scaleY(d.values[index])})`)
+            .style("fill", color);
+    }
+    else
+    {
+        let id = "graph" + index;
+        let line = createPath(scaleX, scaleY, color, id);
+        createAnimatedChart(data, 0, index, line, id);
+    }
+}
+
+//Animated chart code.
+
+function createAnimatedChart(data, elementIndex, minMaxIndex, line, id)
+{
+    if(elementIndex === data.length)
+    {
         return;
     }
 
-    //Histogram.
-    const barWidth = 5.0;
-    const offset = (index == 0) ? -barWidth / 2 : barWidth / 2;
-    svg.selectAll(".dot")
-        .data(data)
-        .enter()
-        .append("rect")
-        .attr("width", barWidth)
-        .attr("x", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
-        .attr("height", d => height - marginY * 2 - scaleY(d.values[index]))
-        .attr("transform", d => `translate(${marginX - barWidth / 2 + offset},${marginY + scaleY(d.values[index])})`)
-        .style("fill", color);
-}   
+    let reshapedData = [];
+    for(const item of data)
+    {
+        reshapedData.push({x: item.labelX, y: item.values[minMaxIndex]});
+    }
+
+    let chart = svg.select("path#" + id)
+                   .datum(reshapedData)
+                   .attr("d", line);
+
+    const pathLength = chart.node().getTotalLength();
+    
+    chart
+    .attr("stroke-dashoffset", pathLength)
+    .attr("stroke-dasharray", pathLength)
+    .transition()
+    .ease(d3.easeLinear)
+    .duration(2000)
+    .attr("stroke-dashoffset", 0);
+
+    //createAnimatedChart(data, scaleX, scaleY, index + 1, minMaxIndex, line);
+}
+
+function createPath(scaleX, scaleY, color, id) 
+{
+    let line = d3.line()
+                 .x(d => scaleX(d.x))
+                 .y(d => scaleY(d.y));
+    svg.append("path") // добавляем путь
+       .attr("id", id)  
+       .attr("transform", `translate(${marginX}, ${marginY})`)
+       .style("stroke-width", "2")
+       .style("stroke", color);
+   
+    return line;
+}
+ 
+
+d3.select("#graphAnimated").on
+(
+    "change", function()
+    {
+        graphAnimated = d3.select("#graphAnimated").property("checked");
+//TODO: this function is only executed when radiobutton gets checked.
+        nextStepGraph = d3.select("#nextStepGraph");
+        animateGraph = d3.select("#animateGraph");
+
+        if(graphAnimated)
+        {
+            nextStepGraph.style("display", "");
+            animateGraph.style("display", "");
+        }
+        else
+        {
+            nextStepGraph.style("display", "none");
+            animateGraph.style("display", "none");
+        }
+    }
+)
