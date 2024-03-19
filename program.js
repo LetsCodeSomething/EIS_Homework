@@ -693,7 +693,10 @@ d3.select("#drawGraph").on
 (
     "click", function()
     {
-        drawGraph();
+        if(!drawGraph())
+        {
+            alert("Ошибка: не выбраны данные для простроения графика");
+        }
     }
 );
 
@@ -708,70 +711,68 @@ d3.select("#deleteGraph").on
 
 function drawGraph()
 {
-    let oxStore = d3.select("#oxStore");
-    const keyX = oxStore.property("checked") ? "Store" : "Unemployment";
+    const keyX = d3.select("#oxStore").property("checked") ? "Store" : "Unemployment";
 
     // значения по оси ОУ
-    let oyMax = d3.select("#oyMax");
-    let oyMin = d3.select("#oyMin");
-    const isMax = oyMax.property("checked");
-    const isMin = oyMin.property("checked");
+    const isMaxSelected = d3.select("#oyMax").property("checked");
+    const isMinSelected = d3.select("#oyMin").property("checked");
    
-    if(!isMax && !isMin)
+    if(!isMaxSelected && !isMinSelected)
     {
-        alert("Ошибка: не выбраны данные для построения графика");
-        return;
+        return false;
     }
 
     svg.attr("height", height).attr("width", width);
     svg.selectAll("*").remove();
 
     // создаем массив для построения графика
-    const arrGraph = createArrGraph(dataset, keyX);
+    const data = createGraphData(dataset, keyX);
    
     // создаем шкалы преобразования и выводим оси
-    const [scX, scY] = createAxis(arrGraph, isMin, isMax);
+    const [scaleX, scaleY] = createGraphAxes(data, isMinSelected, isMaxSelected);
     
-    let graphType = d3.select("#graphDot").property("checked") ? 0 : (d3.select("#graphHisto").property("checked") ? 1 : 2);
+    let graphType = d3.select("#graphTypeDot").property("checked") ? 0 : (d3.select("#graphTypeHisto").property("checked") ? 1 : 2);
 
     // рисуем графики
-    if (isMin) 
+    if (isMinSelected) 
     {
-        createChart(arrGraph, scX, scY, 0, "blue", graphType);
+        fillGraphWithData(data, scaleX, scaleY, 0, "blue", graphType);
     }
-    if (isMax) 
+    if (isMaxSelected) 
     {
-        createChart(arrGraph, scX, scY, 1, "red", graphType);
+        fillGraphWithData(data, scaleX, scaleY, 1, "red", graphType);
     }
+
+    return true;
 }
 
-function createArrGraph(data, key)
+function createGraphData(rawData, keyX)
 {
-    groupObj = d3.group(data, d => d[key]);
-    let arrGraph =[];
+    groupObj = d3.group(rawData, d => d[keyX]);
+    let data =[];
     
     for(const entry of groupObj)
     {
         let minMax = d3.extent(entry[1].map(d => d["Weekly_Sales"]));
-        arrGraph.push({labelX : entry[0], values : minMax});
+        data.push({labelX : entry[0], values : minMax});
     }
-    return arrGraph;
+    return data;
 }
 
-function createAxis(data, isMin, isMax)
+function createGraphAxes(data, isMinSelected, isMaxSelected)
 {
     // в зависимости от выбранных пользователем данных по OY
     // находим интервал значений по оси OY
     let firstRange = d3.extent(data.map(d => d.values[0]));
     let secondRange = d3.extent(data.map(d => d.values[1]));
     
+    //Calculate min and max values for oy axis.
     let min; 
     let max; 
-    
-    //isMin and isMax can't be false simultaneously.
-    if(isMin)
+    //isMinSelected and isMaxSelected can't be false simultaneously.
+    if(isMinSelected)
     {
-        if(isMax)
+        if(isMaxSelected)
         {
             min = firstRange[0];
             max = secondRange[1];
@@ -817,14 +818,14 @@ function createAxis(data, isMin, isMax)
     return [scaleX, scaleY];
 }
 
-function createChart(data, scaleX, scaleY, index, color, graphType) 
+function fillGraphWithData(data, scaleX, scaleY, minMaxIndex, color, graphType) 
 {
-    //Dot graph.
     if(graphType == 0)
     {
-        const r = 4;
+        //Dot graph.
         // чтобы точки не накладывались, сдвинем их по вертикали
-        let ident = (index == 0)? -r / 2 : r / 2;
+        const r = 4;
+        const offset = (minMaxIndex == 0)? -r / 2 : r / 2;
 
         svg.selectAll(".dot")
             .data(data)
@@ -832,7 +833,7 @@ function createChart(data, scaleX, scaleY, index, color, graphType)
             .append("circle")
             .attr("r", r)
             .attr("cx", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
-            .attr("cy", d => scaleY(d.values[index]) + ident)
+            .attr("cy", d => scaleY(d.values[minMaxIndex]) + offset)
             .attr("transform", `translate(${marginX}, ${marginY})`)
             .style("fill", color);
     }
@@ -840,22 +841,23 @@ function createChart(data, scaleX, scaleY, index, color, graphType)
     {
         //Histogram.
         const barWidth = 5.0;
-        const offset = (index == 0) ? -barWidth / 2 : barWidth / 2;
+        const offset = (minMaxIndex == 0) ? -barWidth / 2 : barWidth / 2;
         svg.selectAll(".dot")
             .data(data)
             .enter()
             .append("rect")
             .attr("width", barWidth)
             .attr("x", d => scaleX(d.labelX) + scaleX.bandwidth() / 2)
-            .attr("height", d => height - marginY * 2 - scaleY(d.values[index]))
-            .attr("transform", d => `translate(${marginX - barWidth / 2 + offset},${marginY + scaleY(d.values[index])})`)
+            .attr("height", d => height - marginY * 2 - scaleY(d.values[minMaxIndex]))
+            .attr("transform", d => `translate(${marginX - barWidth / 2 + offset},${marginY + scaleY(d.values[minMaxIndex])})`)
             .style("fill", color);
     }
     else
     {
-        let id = "graph" + index;
+        //Animated line graph.
+        let id = "graph" + minMaxIndex;
         let line = createPath(scaleX, scaleY, color, id);
-        createAnimatedChart(data, 0, index, line, id);
+        createAnimatedChart(data, 0, minMaxIndex, line, id);
     }
 }
 
@@ -887,8 +889,6 @@ function createAnimatedChart(data, elementIndex, minMaxIndex, line, id)
     .ease(d3.easeLinear)
     .duration(2000)
     .attr("stroke-dashoffset", 0);
-
-    //createAnimatedChart(data, scaleX, scaleY, index + 1, minMaxIndex, line);
 }
 
 function createPath(scaleX, scaleY, color, id) 
@@ -906,23 +906,26 @@ function createPath(scaleX, scaleY, color, id)
 }
  
 
-d3.select("#graphAnimated").on
+d3.selectAll("input[name='graphType']").on
 (
     "change", function()
     {
-        graphAnimated = d3.select("#graphAnimated").property("checked");
-//TODO: this function is only executed when radiobutton gets checked.
-        nextStepGraph = d3.select("#nextStepGraph");
-        animateGraph = d3.select("#animateGraph");
+        let isGraphTypeAnimated = d3.select("#graphTypeAnimated").property("checked");
 
-        if(graphAnimated)
+        let drawGraph = d3.select("#drawGraph");
+        let makeStepOnGraph = d3.select("#makeStepOnGraph");
+        let animateGraph = d3.select("#animateGraph");
+
+        if(isGraphTypeAnimated)
         {
-            nextStepGraph.style("display", "");
+            drawGraph.attr("value", "Начать заново");
+            makeStepOnGraph.style("display", "");
             animateGraph.style("display", "");
         }
         else
         {
-            nextStepGraph.style("display", "none");
+            drawGraph.attr("value", "Построить");
+            makeStepOnGraph.style("display", "none");
             animateGraph.style("display", "none");
         }
     }
