@@ -642,7 +642,7 @@ d3.select("#applyGrouping").on
             
             if(groupCountFunc)
             {
-                let count = d3.count(item[1].map(d => d.Weekly_sales));
+                let count = item[1].length;
                 row.append("td").text(count);
             }
             if(groupMaxFunc)
