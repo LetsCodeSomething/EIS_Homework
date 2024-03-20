@@ -1019,7 +1019,7 @@ function animateGraph()
 {
     const keyX = d3.select("#oxStore").property("checked") ? "Store" : "Unemployment";
     let data = createGraphData(dataset, keyX);
-
+    
     if(animateToIndex === data.length - 1)
     {
         return true;
@@ -1028,7 +1028,7 @@ function animateGraph()
     if(animateFromIndex === -1)
     {
         animateFromIndex = -1;
-        animateToIndex = -1;
+        animateToIndex = data.length - 1;
     }
     else
     {
