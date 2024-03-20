@@ -688,9 +688,6 @@ d3.select(window).on
 (
     "load", function()
     {
-        animateFromIndex = -1;
-        animateToIndex = -1;
-
         if(!drawGraph())
         {
             alert("Ошибка: не выбраны данные для простроения графика");
@@ -941,6 +938,8 @@ function fillGraphWithData(data, scaleX, scaleY, minMaxIndex, color, graphType)
 
             fromPathLength = pathLength;
             toPathLength = 0;
+
+            animateToIndex = data.length - 1;
         }
         else
         {
@@ -1019,7 +1018,7 @@ function animateGraph()
 {
     const keyX = d3.select("#oxStore").property("checked") ? "Store" : "Unemployment";
     let data = createGraphData(dataset, keyX);
-    
+
     if(animateToIndex === data.length - 1)
     {
         return true;
