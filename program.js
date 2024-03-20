@@ -679,21 +679,80 @@ const marginY = 50;
 const height = 400;
 const width = 800;
 
+let animateFromIndex = -1;
+let animateToIndex = -1;
+
 let svg = d3.select("svg");
 
 d3.select(window).on
 (
     "load", function()
     {
-        drawGraph();
+        animateFromIndex = -1;
+        animateToIndex = -1;
+
+        if(!drawGraph())
+        {
+            alert("Ошибка: не выбраны данные для простроения графика");
+        }
     }
 );
+
+d3.selectAll("input[name='graphType']").on
+(
+    "change", function()
+    {
+        let isGraphTypeAnimated = d3.select("#graphTypeAnimated").property("checked");
+
+        let drawGraph = d3.select("#drawGraph");
+        let makeStepOnGraph = d3.select("#makeStepOnGraph");
+        let animateGraph = d3.select("#animateGraph");
+
+        if(isGraphTypeAnimated)
+        {
+            drawGraph.attr("value", "Начать заново");
+            makeStepOnGraph.style("display", "");
+            animateGraph.style("display", "");
+        }
+        else
+        {
+            drawGraph.attr("value", "Построить");
+            makeStepOnGraph.style("display", "none");
+            animateGraph.style("display", "none");
+        }
+    }
+)
 
 d3.select("#drawGraph").on
 (
     "click", function()
     {
+        animateFromIndex = -1;
+        animateToIndex = -1;
+
         if(!drawGraph())
+        {
+            alert("Ошибка: не выбраны данные для простроения графика");
+        }
+    }
+);
+
+d3.select("#makeStepOnGraph").on
+(
+    "click", function()
+    {
+        if(!makeStepOnGraph())
+        {
+            alert("Ошибка: не выбраны данные для простроения графика");
+        }
+    }
+);
+
+d3.select("#animateGraph").on
+(
+    "click", function()
+    {
+        if(!animateGraph())
         {
             alert("Ошибка: не выбраны данные для простроения графика");
         }
@@ -716,7 +775,7 @@ function drawGraph()
     // значения по оси ОУ
     const isMaxSelected = d3.select("#oyMax").property("checked");
     const isMinSelected = d3.select("#oyMin").property("checked");
-   
+
     if(!isMaxSelected && !isMinSelected)
     {
         return false;
@@ -742,6 +801,8 @@ function drawGraph()
     {
         fillGraphWithData(data, scaleX, scaleY, 1, "red", graphType);
     }
+
+    currentIndex = data.length - 1;
 
     return true;
 }
@@ -823,7 +884,6 @@ function fillGraphWithData(data, scaleX, scaleY, minMaxIndex, color, graphType)
     if(graphType == 0)
     {
         //Dot graph.
-        // чтобы точки не накладывались, сдвинем их по вертикали
         const r = 4;
         const offset = (minMaxIndex == 0)? -r / 2 : r / 2;
 
@@ -855,40 +915,63 @@ function fillGraphWithData(data, scaleX, scaleY, minMaxIndex, color, graphType)
     else
     {
         //Animated line graph.
-        let id = "graph" + minMaxIndex;
+        let id = "path" + minMaxIndex;
         let line = createPath(scaleX, scaleY, color, id);
-        createAnimatedChart(data, 0, minMaxIndex, line, id);
-    }
-}
 
-//Animated chart code.
+        let reshapedData = [];
+        for(const item of data)
+        {
+            reshapedData.push({x: item.labelX, y: item.values[minMaxIndex]});
+        }
 
-function createAnimatedChart(data, elementIndex, minMaxIndex, line, id)
-{
-    if(elementIndex === data.length)
-    {
-        return;
-    }
+        let path = svg.select("#"+id).datum(reshapedData).attr("d", line);
 
-    let reshapedData = [];
-    for(const item of data)
-    {
-        reshapedData.push({x: item.labelX, y: item.values[minMaxIndex]});
-    }
+        //Calculate the region of the graph that should be animated.
+        let duration;
 
-    let chart = svg.select("path#" + id)
-                   .datum(reshapedData)
-                   .attr("d", line);
+        let fromPathLength = 0;
+        let toPathLength = 0;
 
-    const pathLength = chart.node().getTotalLength();
+        //Total length of all lines which the graph consists of.
+        const pathLength = path.node().getTotalLength();
+
+        if(animateFromIndex === -1)
+        {
+            duration = 2000;    
+
+            fromPathLength = pathLength;
+            toPathLength = 0;
+        }
+        else
+        {
+            //Scales return undefined, if the passed value is outside of their boundaries.
+            for(let i = reshapedData.length - 1; i > animateToIndex; i--)
+            {
+                toPathLength += calculateDistance(scaleX(reshapedData[i].x), scaleY(reshapedData[i].y), 
+                                                   scaleX(reshapedData[i - 1].x), scaleY(reshapedData[i - 1].y));
+            }
+
+            fromPathLength = pathLength;
+            for(let i = 0; i < animateFromIndex; i++)
+            {
+                fromPathLength -= calculateDistance(scaleX(reshapedData[i].x), scaleY(reshapedData[i].y), 
+                                                    scaleX(reshapedData[i + 1].x), scaleY(reshapedData[i + 1].y));
+            }
+            
+            duration = (fromPathLength - toPathLength) / pathLength * 2000;
+        }
     
-    chart
-    .attr("stroke-dashoffset", pathLength)
-    .attr("stroke-dasharray", pathLength)
-    .transition()
-    .ease(d3.easeLinear)
-    .duration(2000)
-    .attr("stroke-dashoffset", 0);
+        //To animate the graph, stroke-dashoffset should be interpolated.
+        //pathLength means that the graph should be fully hidden.
+        //0 means that the graph should be fully drawn.
+        path
+            .attr("stroke-dashoffset", fromPathLength)
+            .attr("stroke-dasharray", pathLength)
+            .transition()
+            .ease(d3.easeLinear)
+            .duration(duration)
+            .attr("stroke-dashoffset", toPathLength);
+    }
 }
 
 function createPath(scaleX, scaleY, color, id) 
@@ -905,28 +988,58 @@ function createPath(scaleX, scaleY, color, id)
     return line;
 }
  
+function makeStepOnGraph()
+{
+    const keyX = d3.select("#oxStore").property("checked") ? "Store" : "Unemployment";
+    let data = createGraphData(dataset, keyX);
 
-d3.selectAll("input[name='graphType']").on
-(
-    "change", function()
+    //drawGraph was called, so the entire graph should be on screen.
+    //This means we need to restart drawing.
+    if(animateFromIndex === -1)
     {
-        let isGraphTypeAnimated = d3.select("#graphTypeAnimated").property("checked");
-
-        let drawGraph = d3.select("#drawGraph");
-        let makeStepOnGraph = d3.select("#makeStepOnGraph");
-        let animateGraph = d3.select("#animateGraph");
-
-        if(isGraphTypeAnimated)
-        {
-            drawGraph.attr("value", "Начать заново");
-            makeStepOnGraph.style("display", "");
-            animateGraph.style("display", "");
-        }
-        else
-        {
-            drawGraph.attr("value", "Построить");
-            makeStepOnGraph.style("display", "none");
-            animateGraph.style("display", "none");
-        }
+        animateFromIndex = 0;
+        animateToIndex = 1;
     }
-)
+    else if(animateToIndex < data.length - 1)
+    {
+        animateFromIndex++;
+        animateToIndex++;
+    }
+    //The graph is fully drawn, restart.
+    else
+    {
+        animateFromIndex = 0;
+        animateToIndex = 1;
+    }
+
+    return drawGraph();
+}
+
+function animateGraph()
+{
+    const keyX = d3.select("#oxStore").property("checked") ? "Store" : "Unemployment";
+    let data = createGraphData(dataset, keyX);
+
+    if(animateToIndex === data.length - 1)
+    {
+        return true;
+    }
+
+    if(animateFromIndex === -1)
+    {
+        animateFromIndex = -1;
+        animateToIndex = -1;
+    }
+    else
+    {
+        animateFromIndex++;
+        animateToIndex = data.length - 1;
+    }
+
+    return drawGraph();
+}
+
+function calculateDistance(x1, y1, x2, y2)
+{
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+}
